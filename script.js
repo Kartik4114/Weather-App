@@ -6,6 +6,7 @@ const grantAccessContainer = document.querySelector(".grant-location-container")
 const searchForm = document.querySelector("[data-searchForm]");
 const loadingScreen = document.querySelector(".loading-container");
 const userInfoContainer = document.querySelector(".user-info-container");
+const errorContainer=document.querySelector(".error-container");
 
 // Initially variables need
 let currentTab=userTab;   
@@ -71,10 +72,15 @@ async function fetchUserWeatherInfo(coordinates){
 
         loadingScreen.classList.remove("active");
         userInfoContainer.classList.add("active");
+        
         renderWeatherInfo(data);
     } 
     catch(err){
         loadingScreen.classList.remove("active");
+        // errorContainer.classList.add("active");
+        // errorContainer.classList.remove("active");
+
+        // userInfoContainer.classList.remove("active");
         // HW
     }
 }
@@ -110,10 +116,10 @@ function renderWeatherInfo(weatherInfo){
     countryIcon.src=`https://flagcdn.com/144x108/${weatherInfo?.sys?.country.toLowerCase()}.png`;
     desc.innerText=weatherInfo?.weather?.[0]?.description;
     weatherIcon.src=`https://openweathermap.org/img/w/${weatherInfo?.weather?.[0]?.icon}.png`;
-    temp.innerText=weatherInfo?.main?.temp;
-    windspeed.innerText=weatherInfo?.wind?.speed;
-    humidity.innerText=weatherInfo?.main?.humidity;
-    cloudiness.innerText=weatherInfo?.clouds?.all;
+    temp.innerText= `${weatherInfo?.main?.temp}°C`;
+    windspeed.innerText=`${weatherInfo?.wind?.speed} m/s`;
+    humidity.innerText=`${weatherInfo?.main?.humidity}%`;
+    cloudiness.innerText=`${weatherInfo?.clouds?.all}%`;
     
 }
 
@@ -163,13 +169,24 @@ async function fetchSearchWeatherInfo(city){
             `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}`
         );
         const data=await response.json();
-        loadingScreen.classList.remove("active");
-        userInfoContainer.classList.add("active");
-        renderWeatherInfo(data);
 
+       if (response.ok) {
+            loadingScreen.classList.remove("active");
+            userInfoContainer.classList.add("active");
+            errorContainer.classList.remove("active");
+            renderWeatherInfo(data);
+        } else {
+            throw new Error(data.message);
+        }
     }
-
+    
     catch(err){
+        
+        // console.log("error");
+        loadingScreen.classList.remove("active");
+        userInfoContainer.classList.remove("active");
+        errorContainer.classList.add("active");
+        // userInfoContainer.classList.add("active_404");
 
     }
 }
